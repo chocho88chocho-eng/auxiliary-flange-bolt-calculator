@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASME B16.5 볼트 길이 계산기 (Cloud)</title>
+    <title>BOLT SELECTOR PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'bolt-calc-app';
 
-        // 전역 객체에 할당하여 일반 스크립트 블록에서 접근 가능하게 설정
         window.db = db;
         window.appId = appId;
         window.auth = auth;
@@ -27,7 +25,6 @@
         window.deleteDoc = deleteDoc;
         window.doc = doc;
 
-        // Auth initialization
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -36,183 +33,254 @@
                     await signInAnonymously(auth);
                 }
             } catch (err) {
-                console.error("Auth failed", err);
+                console.error("인증 실패", err);
             }
         };
         initAuth();
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                if (typeof window.loadHistory === 'function') {
-                    window.loadHistory();
-                }
+            if (user && typeof window.loadHistory === 'function') {
+                window.loadHistory();
             }
         });
     </script>
     <style>
-        body { background-color: #f1f5f9; font-family: 'Pretendard', sans-serif; }
-        .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-primary { background-color: #2563eb; color: white; transition: all 0.2s; }
-        .btn-primary:hover { background-color: #1d4ed8; }
-        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        
+        body { 
+            background-color: #f1f5f9; 
+            font-family: 'Pretendard', sans-serif; 
+            color: #1e293b;
+        }
+        
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+        }
+
+        /* 메인 결과 카드 */
+        .result-card {
+            background-color: #1a233a;
+            color: white;
+            border-radius: 16px;
+        }
+
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .custom-control {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #1e293b;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .custom-control:focus {
+            border-color: #3b82f6;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #1e293b;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+        }
+
+        .basis-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.9rem;
+        }
+        .basis-row:last-child { border-bottom: none; }
+
+        .loader { 
+            border: 2px solid #f3f3f3; 
+            border-radius: 50%; 
+            border-top: 2px solid #3b82f6; 
+            width: 16px; height: 16px; 
+            animation: spin 1s linear infinite; 
+            display: none; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .basis-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #e2e8f0; }
-        .basis-item:last-child { border-bottom: none; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-10 min-h-screen">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="text-center md:text-left">
-                <h1 class="text-3xl font-black text-slate-900 tracking-tight text-blue-600">BOLT SELECTOR PRO</h1>
-                <p class="text-slate-500">ASME B16.5 규격 데이터 기반 클라우드 협업 도구</p>
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-[#1a233a]">BOLT SELECTOR PRO</h1>
+                <p class="text-xs text-slate-500 font-medium">ASME B16.5 규격 데이터 기반 클라우드 협업 도구</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="shareLink()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6a3 3 0 100-2.684m0 2.684l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                <button onclick="shareLink()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6a3 3 0 100-2.684m0 2.684l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     링크 공유
                 </button>
-                <button onclick="saveToCloud()" class="btn-primary flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-200">
+                <button onclick="saveToCloud()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-lg shadow-blue-200 flex items-center gap-2">
                     <span id="saveLabel">클라우드 저장</span>
                     <div id="saveLoader" class="loader"></div>
                 </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Left: Settings -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="card p-6 border-l-4 border-blue-600">
-                    <h2 class="font-bold text-slate-800 mb-4 uppercase text-sm tracking-wider">Specifications</h2>
-                    <div class="space-y-4 text-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Sidebar (Left) -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- SPECIFICATIONS -->
+                <div class="card p-6 border-l-[6px] border-blue-500">
+                    <h2 class="section-title">SPECIFICATIONS</h2>
+                    <div class="space-y-4">
                         <div>
-                            <label class="font-semibold text-slate-600 mb-1 block">Rating (#)</label>
-                            <select id="rating" onchange="updateSpecs()" class="w-full p-2.5 border rounded-lg outline-none">
+                            <label class="input-label">Rating (#)</label>
+                            <select id="rating" onchange="updateSpecs()" class="custom-control">
                                 <option value="150">#150</option>
                                 <option value="300" selected>#300</option>
                                 <option value="600">#600</option>
                             </select>
                         </div>
                         <div>
-                            <label class="font-semibold text-slate-600 mb-1 block">Size (NPS)</label>
-                            <select id="size" onchange="updateSpecs()" class="w-full p-2.5 border rounded-lg outline-none">
-                                <option value="0.5">1/2"</option><option value="0.75">3/4"</option>
-                                <option value="1">1"</option><option value="1.5">1-1/2"</option>
-                                <option value="2" selected>2"</option><option value="3">3"</option>
-                                <option value="4">4"</option><option value="6">6"</option><option value="8">8"</option>
+                            <label class="input-label">Size (NPS)</label>
+                            <select id="size" onchange="updateSpecs()" class="custom-control">
+                                <option value="0.5">1/2"</option>
+                                <option value="0.75">3/4"</option>
+                                <option value="1">1"</option>
+                                <option value="1.5">1-1/2"</option>
+                                <option value="2" selected>2"</option>
+                                <option value="3">3"</option>
+                                <option value="4">4"</option>
+                                <option value="6">6"</option>
+                                <option value="8">8"</option>
                             </select>
                         </div>
                         <div>
-                            <label class="font-semibold text-slate-600 mb-1 block">Gasket Type</label>
-                            <select id="gasketType" onchange="calculate()" class="w-full p-2.5 border rounded-lg outline-none">
+                            <label class="input-label">Gasket Type</label>
+                            <select id="gasketType" onchange="calculate()" class="custom-control">
                                 <option value="4.5">Spiral Wound (4.5mm)</option>
-                                <option value="3.0">Teflon (3.0mm)</option>
+                                <option value="3.0">PTFE (3.0mm)</option>
+                                <option value="1.5">Rubber (1.5mm)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="font-semibold text-slate-600 mb-1 block">Extra Threads (산)</label>
-                            <input type="number" id="extraThreads" value="4" min="0" oninput="calculate()" class="w-full p-2.5 border rounded-lg outline-none">
+                            <label class="input-label">Total Extra Threads (전체 산여유)</label>
+                            <div class="relative">
+                                <input type="number" id="extraThreads" value="4" min="0" oninput="calculate()" class="custom-control font-bold pr-10">
+                                <span class="absolute right-3 top-2.5 text-[10px] text-slate-300 font-bold uppercase">Total</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- History List -->
-                <div class="card p-5">
-                    <h2 class="font-bold text-slate-800 mb-4 text-sm uppercase">Cloud History</h2>
-                    <div id="historyList" class="space-y-2 max-h-80 overflow-y-auto pr-2 text-xs">
-                        <p class="text-slate-400 italic">저장된 내역이 없습니다.</p>
+                <!-- CLOUD HISTORY -->
+                <div class="card p-6">
+                    <h2 class="section-title">CLOUD HISTORY</h2>
+                    <div id="historyList" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                        <p class="text-[11px] text-slate-400 italic">저장된 내역이 없습니다.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Display -->
-            <div class="lg:col-span-3 space-y-6">
-                <!-- Result Card -->
-                <div class="card p-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
-                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                        <div>
-                            <span class="text-blue-400 font-bold uppercase tracking-widest text-xs">Recommended Bolt Length</span>
-                            <div class="flex items-baseline gap-2 mt-2">
-                                <span id="finalLengthMm" class="text-7xl font-black">0</span>
-                                <span class="text-2xl font-bold text-slate-400">mm</span>
-                            </div>
-                            <p id="specSummary" class="text-slate-400 mt-4 font-mono text-sm"></p>
+            <!-- Main Content (Right) -->
+            <div class="lg:col-span-9 space-y-6">
+                <!-- Result Dashboard -->
+                <div class="result-card p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+                    <div class="flex-1 text-center md:text-left">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">RECOMMENDED BOLT LENGTH</span>
+                        <div class="flex items-baseline justify-center md:justify-start gap-2 mt-2">
+                            <span id="finalLengthMm" class="text-8xl font-black">0</span>
+                            <span class="text-3xl font-bold text-slate-400">mm</span>
                         </div>
-                        <div class="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10 w-full md:w-64">
-                            <div class="space-y-3">
-                                <div class="flex justify-between border-b border-white/5 pb-2">
-                                    <span class="text-slate-400">Min Req:</span>
-                                    <span id="minReq" class="font-bold">0.00 mm</span>
-                                </div>
-                                <div class="flex justify-between border-b border-white/5 pb-2">
-                                    <span class="text-slate-400">Inch Approx:</span>
-                                    <span id="finalLengthInch" class="font-bold">0 "</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">Quantity:</span>
-                                    <span id="boltQty" class="font-bold text-blue-400">-</span>
-                                </div>
+                        <p id="specSummary" class="text-slate-400 mt-4 text-[11px] font-medium tracking-tight uppercase"></p>
+                    </div>
+                    
+                    <!-- Stats Table -->
+                    <div class="w-full md:w-72 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                        <div class="space-y-4 text-sm font-medium">
+                            <div class="flex justify-between items-center text-slate-400">
+                                <span>Min Req:</span>
+                                <span id="minReq" class="text-white font-bold font-mono">0.00 mm</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-400">
+                                <span>Bolt Size:</span>
+                                <span id="dashboardBoltSize" class="text-white font-bold font-mono">-</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-400 pt-2 border-t border-white/5">
+                                <span>Quantity:</span>
+                                <span id="dashboardBoltQty" class="text-blue-400 font-black">0 EA</span>
                             </div>
                         </div>
                     </div>
-                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-600 rounded-full blur-3xl opacity-20"></div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Calculation Basis (New) -->
-                    <div class="card p-6">
-                        <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <!-- Basis & Reference Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Bolt Length Calculation Basis -->
+                    <div class="md:col-span-7 card p-8">
+                        <h2 class="section-title flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                             Bolt Length Calculation Basis
                         </h2>
-                        <div class="space-y-1 text-sm text-slate-600">
-                            <div class="basis-item">
-                                <span>Flange Thickness (x2)</span>
-                                <span id="basisFlange" class="font-mono text-slate-900 font-bold">-</span>
+                        <div class="space-y-1">
+                            <div class="basis-row">
+                                <span class="text-slate-500">Flange Thickness (x2)</span>
+                                <span id="basisFlange" class="font-bold">-</span>
                             </div>
-                            <div class="basis-item">
-                                <span>Gasket Thickness</span>
-                                <span id="basisGasket" class="font-mono text-slate-900 font-bold">-</span>
+                            <div class="basis-row">
+                                <span class="text-slate-500">Gasket Thickness</span>
+                                <span id="basisGasket" class="font-bold">-</span>
                             </div>
-                            <div class="basis-item">
-                                <span>Heavy Hex Nut H (x2)</span>
-                                <span id="basisNut" class="font-mono text-slate-900 font-bold">-</span>
+                            <div class="basis-row">
+                                <span class="text-slate-500">Heavy Hex Nut H (x2)</span>
+                                <span id="basisNut" class="font-bold">-</span>
                             </div>
-                            <div class="basis-item">
-                                <span>Washers Thk (x2)</span>
-                                <span id="basisWasher" class="font-mono text-slate-900 font-bold">-</span>
+                            <div class="basis-row">
+                                <span class="text-slate-500">Washers Thk (x2)</span>
+                                <span id="basisWasher" class="font-bold">-</span>
                             </div>
-                            <div class="basis-item">
-                                <span>Extra Threads (Margin)</span>
-                                <span id="basisExtra" class="font-mono text-slate-900 font-bold">-</span>
+                            <div class="basis-row">
+                                <span class="text-slate-500">Extra Threads (Margin)</span>
+                                <span id="basisExtra" class="font-bold">-</span>
                             </div>
-                            <div class="pt-2 flex justify-between font-bold text-blue-600 border-t border-slate-200 mt-2">
-                                <span>Total Minimum Required</span>
-                                <span id="basisTotal">-</span>
+                            <div class="flex justify-between items-center pt-5 mt-2 border-t-2 border-slate-100">
+                                <span class="font-black text-blue-600">Total Minimum Required</span>
+                                <span id="basisTotal" class="text-xl font-black text-blue-600">-</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Reference Table -->
-                    <div class="card p-6">
-                        <h2 class="font-bold text-slate-800 mb-4">ASME B16.5 Reference</h2>
+                    <!-- ASME Reference -->
+                    <div class="md:col-span-5 card p-8">
+                        <h2 class="section-title">ASME B16.5 Reference</h2>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="p-3 bg-slate-50 rounded-xl">
-                                <span class="text-[10px] uppercase font-bold text-slate-400">Flange Thk</span>
-                                <div class="text-lg font-bold text-slate-700"><span id="displayT">-</span> <small class="text-xs font-normal">mm</small></div>
+                            <div class="bg-slate-50 p-4 rounded-xl">
+                                <span class="text-[9px] font-black text-slate-400 block mb-1 uppercase">Flange Thk</span>
+                                <div class="text-lg font-black text-[#1a233a]"><span id="displayT">-</span> <small class="text-[10px] text-slate-400">mm</small></div>
                             </div>
-                            <div class="p-3 bg-slate-50 rounded-xl">
-                                <span class="text-[10px] uppercase font-bold text-slate-400">Bolt Size</span>
-                                <div class="text-lg font-bold text-slate-700"><span id="displayDia">-</span> <small class="text-xs font-normal">in</small></div>
+                            <div class="bg-slate-50 p-4 rounded-xl">
+                                <span class="text-[9px] font-black text-slate-400 block mb-1 uppercase">Bolt Size</span>
+                                <div class="text-lg font-black text-[#1a233a]"><span id="displayDia">-</span> <small class="text-[10px] text-slate-400">in</small></div>
                             </div>
-                            <div class="p-3 bg-slate-50 rounded-xl">
-                                <span class="text-[10px] uppercase font-bold text-slate-400">Nut H (Heavy)</span>
-                                <div class="text-lg font-bold text-slate-700"><span id="displayN">-</span> <small class="text-xs font-normal">mm</small></div>
+                            <div class="bg-slate-50 p-4 rounded-xl">
+                                <span class="text-[9px] font-black text-slate-400 block mb-1 uppercase">Nut H (Heavy)</span>
+                                <div class="text-lg font-black text-[#1a233a]"><span id="displayN">-</span> <small class="text-[10px] text-slate-400">mm</small></div>
                             </div>
-                            <div class="p-3 bg-slate-50 rounded-xl">
-                                <span class="text-[10px] uppercase font-bold text-slate-400">Pitch (UNC)</span>
-                                <div class="text-lg font-bold text-slate-700"><span id="displayP">-</span> <small class="text-xs font-normal">mm</small></div>
+                            <div class="bg-slate-50 p-4 rounded-xl">
+                                <span class="text-[9px] font-black text-slate-400 block mb-1 uppercase">Pitch (UNC)</span>
+                                <div class="text-lg font-black text-[#1a233a]"><span id="displayP">-</span> <small class="text-[10px] text-slate-400">mm</small></div>
                             </div>
                         </div>
                     </div>
@@ -222,40 +290,40 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-slate-800 text-white rounded-full shadow-2xl text-sm font-medium transition-all opacity-0 translate-y-10 z-50"></div>
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-[#1a233a] text-white rounded-full shadow-2xl text-xs font-bold transition-all opacity-0 translate-y-10 z-50"></div>
 
     <script>
         const asmeData = {
             "150": {
-                "0.5":  { t: 11.2, dia: "1/2",  n: 11.5, p: 1.95, w: 3.2, q: 4 },
-                "0.75": { t: 12.7, dia: "1/2",  n: 11.5, p: 1.95, w: 3.2, q: 4 },
-                "1":    { t: 14.3, dia: "1/2",  n: 11.5, p: 1.95, w: 3.2, q: 4 },
-                "1.5":  { t: 17.5, dia: "1/2",  n: 11.5, p: 1.95, w: 3.2, q: 4 },
-                "2":    { t: 19.1, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 4 },
-                "3":    { t: 23.9, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 4 },
-                "4":    { t: 23.9, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 8 },
-                "6":    { t: 25.4, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 8 },
-                "8":    { t: 28.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 8 }
+                "0.5":  { t: 11.2, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
+                "0.75": { t: 12.7, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
+                "1":    { t: 14.3, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
+                "1.5":  { t: 17.5, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
+                "2":    { t: 19.1, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
+                "3":    { t: 23.9, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
+                "4":    { t: 23.9, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 8 },
+                "6":    { t: 25.4, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 8 },
+                "8":    { t: 28.6, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 8 }
             },
             "300": {
-                "0.5":  { t: 14.3, dia: "1/2",  n: 11.5, p: 1.95, w: 3.2, q: 4 },
-                "0.75": { t: 15.9, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 4 },
-                "1":    { t: 17.5, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 4 },
-                "1.5":  { t: 20.7, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 4 },
+                "0.5":  { t: 14.3, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
+                "0.75": { t: 15.9, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
+                "1":    { t: 17.5, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
+                "1.5":  { t: 20.7, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 4 },
                 "2":    { t: 22.3, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 8 },
-                "3":    { t: 28.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 8 },
-                "4":    { t: 31.8, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 8 },
-                "6":    { t: 36.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 12 },
-                "8":    { t: 41.3, dia: "7/8",  n: 21.8, p: 2.82, w: 5.6, q: 12 }
+                "3":    { t: 28.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.0, q: 8 },
+                "4":    { t: 31.8, dia: "3/4",  n: 18.2, p: 2.54, w: 4.0, q: 8 },
+                "6":    { t: 36.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.0, q: 12 },
+                "8":    { t: 41.3, dia: "7/8",  n: 21.8, p: 2.82, w: 4.0, q: 12 }
             },
             "600": {
-                "0.5":  { t: 14.3, dia: "1/2",  n: 11.5, p: 1.95, w: 3.2, q: 4 },
-                "1":    { t: 17.5, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 4 },
-                "2":    { t: 25.4, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 8 },
-                "3":    { t: 31.8, dia: "3/4",  n: 18.2, p: 2.54, w: 4.8, q: 8 },
-                "4":    { t: 38.1, dia: "7/8",  n: 21.8, p: 2.82, w: 5.6, q: 8 },
-                "6":    { t: 47.7, dia: "1",    n: 25.0, p: 3.17, w: 6.4, q: 12 },
-                "8":    { t: 55.6, dia: "1-1/8", n: 28.2, p: 3.17, w: 7.2, q: 12 }
+                "0.5":  { t: 14.3, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
+                "1":    { t: 17.5, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
+                "2":    { t: 25.4, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 8 },
+                "3":    { t: 31.8, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 8 },
+                "4":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
+                "6":    { t: 47.7, dia: "1",    n: 25.4, p: 3.17, w: 4.0, q: 12 },
+                "8":    { t: 55.6, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 12 }
             }
         };
 
@@ -268,7 +336,11 @@
                 document.getElementById('displayDia').innerText = spec.dia;
                 document.getElementById('displayN').innerText = spec.n;
                 document.getElementById('displayP').innerText = spec.p;
-                document.getElementById('boltQty').innerText = spec.q + " EA";
+                
+                // 대시보드 업데이트용
+                document.getElementById('dashboardBoltSize').innerText = spec.dia + " in";
+                document.getElementById('dashboardBoltQty').innerText = spec.q + " EA";
+                
                 calculate();
             }
         }
@@ -281,38 +353,33 @@
             const extra = parseInt(document.getElementById('extraThreads').value) || 0;
             if (!spec) return;
 
-            const fSum = (2 * spec.t).toFixed(1);
-            const nSum = (2 * spec.n).toFixed(1);
-            const wSum = (2 * spec.w).toFixed(1);
-            const eSum = (spec.p * extra).toFixed(2);
+            const fSum = spec.t * 2;
+            const nSum = spec.n * 2;
+            const wSum = spec.w * 2;
+            const eSum = spec.p * extra;
 
-            const minReq = parseFloat(fSum) + gThk + parseFloat(nSum) + parseFloat(wSum) + parseFloat(eSum);
+            const minReq = fSum + gThk + nSum + wSum + eSum;
             const standard = Math.ceil(minReq / 5) * 5;
             
-            // UI Update
             document.getElementById('minReq').innerText = minReq.toFixed(2) + " mm";
             document.getElementById('finalLengthMm').innerText = standard;
-            document.getElementById('finalLengthInch').innerText = (standard / 25.4).toFixed(2) + " in";
             document.getElementById('specSummary').innerText = `ASME B16.5 #${r} ${s}" / Gasket ${gThk}mm / ${extra} Thds`;
 
-            // Basis Update
-            document.getElementById('basisFlange').innerText = fSum + " mm";
-            document.getElementById('basisGasket').innerText = gThk + " mm";
-            document.getElementById('basisNut').innerText = nSum + " mm";
-            document.getElementById('basisWasher').innerText = wSum + " mm";
-            document.getElementById('basisExtra').innerText = eSum + " mm";
+            document.getElementById('basisFlange').innerText = fSum.toFixed(1) + " mm";
+            document.getElementById('basisGasket').innerText = gThk.toFixed(1) + " mm";
+            document.getElementById('basisNut').innerText = nSum.toFixed(1) + " mm";
+            document.getElementById('basisWasher').innerText = wSum.toFixed(1) + " mm";
+            document.getElementById('basisExtra').innerText = eSum.toFixed(2) + " mm";
             document.getElementById('basisTotal').innerText = minReq.toFixed(2) + " mm";
         }
 
-        // --- Cloud & Share Logic ---
-
         async function saveToCloud() {
-            if (!window.auth || !window.auth.currentUser) {
-                showToast("로그인 대기 중입니다...");
+            if (!window.auth?.currentUser) {
+                showToast("인증 세션이 유효하지 않습니다.");
                 return;
             }
 
-            const label = prompt("저장할 내역의 이름을 입력하세요 (예: 프로젝트A-라인01):");
+            const label = prompt("저장할 내역의 태그 이름을 입력하세요 (예: Line-101):");
             if (!label) return;
 
             const btn = document.getElementById('saveLabel');
@@ -327,17 +394,16 @@
                 gasket: document.getElementById('gasketType').value,
                 extra: document.getElementById('extraThreads').value,
                 resultMm: document.getElementById('finalLengthMm').innerText,
-                timestamp: Date.now(),
-                createdBy: window.auth.currentUser.uid
+                timestamp: Date.now()
             };
 
             try {
-                const collectionPath = `artifacts/${window.appId}/public/data/history`;
-                await window.addDoc(window.collection(window.db, ...collectionPath.split('/')), data);
-                showToast("클라우드에 저장되었습니다.");
+                const path = `artifacts/${window.appId}/public/data/history`;
+                await window.addDoc(window.collection(window.db, ...path.split('/')), data);
+                showToast("기록이 클라우드에 성공적으로 저장되었습니다.");
             } catch (err) {
                 console.error(err);
-                showToast("저장 실패: 권한 또는 연결 확인");
+                showToast("저장 오류가 발생했습니다.");
             } finally {
                 btn.style.display = 'block';
                 loader.style.display = 'none';
@@ -345,50 +411,45 @@
         }
 
         function loadHistory() {
-            if (!window.db || !window.onSnapshot) return;
-
-            const collectionPath = `artifacts/${window.appId}/public/data/history`;
-            window.onSnapshot(window.collection(window.db, ...collectionPath.split('/')), (snapshot) => {
+            const path = `artifacts/${window.appId}/public/data/history`;
+            window.onSnapshot(window.collection(window.db, ...path.split('/')), (snapshot) => {
                 const list = document.getElementById('historyList');
                 list.innerHTML = "";
                 const docs = snapshot.docs.map(d => ({id: d.id, ...d.data()}))
                             .sort((a,b) => b.timestamp - a.timestamp);
 
                 if (docs.length === 0) {
-                    list.innerHTML = '<p class="text-slate-400 italic">저장된 내역이 없습니다.</p>';
+                    list.innerHTML = '<p class="text-[11px] text-slate-400 italic">저장된 내역이 없습니다.</p>';
                     return;
                 }
 
                 docs.forEach(item => {
                     const div = document.createElement('div');
-                    div.className = "p-3 bg-slate-50 border rounded-lg hover:border-blue-300 transition cursor-pointer relative group";
-                    div.onclick = () => applySpec(item);
+                    div.className = "p-3 bg-slate-50 border border-slate-100 rounded-lg hover:border-blue-200 transition cursor-pointer relative group";
+                    div.onclick = () => {
+                        document.getElementById('rating').value = item.rating;
+                        document.getElementById('size').value = item.size;
+                        document.getElementById('gasketType').value = item.gasket;
+                        document.getElementById('extraThreads').value = item.extra;
+                        updateSpecs();
+                    };
                     div.innerHTML = `
-                        <div class="font-bold text-slate-700 truncate pr-6 text-xs">${item.label}</div>
-                        <div class="text-[10px] text-slate-500 mt-1 uppercase">#${item.rating} ${item.size}" → ${item.resultMm}mm</div>
+                        <div class="font-bold text-slate-800 text-[11px] truncate pr-4">${item.label}</div>
+                        <div class="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">#${item.rating} ${item.size}" → ${item.resultMm}mm</div>
                         <button onclick="event.stopPropagation(); deleteHistory('${item.id}')" class="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"></path></svg>
                         </button>
                     `;
                     list.appendChild(div);
                 });
-            }, (err) => console.error("Snapshot error:", err));
+            }, (err) => console.error(err));
         }
 
         async function deleteHistory(id) {
-            if (!confirm("삭제하시겠습니까?")) return;
-            const docPath = `artifacts/${window.appId}/public/data/history/${id}`;
-            await window.deleteDoc(window.doc(window.db, ...docPath.split('/')));
-            showToast("삭제되었습니다.");
-        }
-
-        function applySpec(item) {
-            document.getElementById('rating').value = item.rating;
-            document.getElementById('size').value = item.size;
-            document.getElementById('gasketType').value = item.gasket;
-            document.getElementById('extraThreads').value = item.extra;
-            updateSpecs();
-            showToast(`'${item.label}' 내역을 불러왔습니다.`);
+            if (!confirm("이 기록을 삭제하시겠습니까?")) return;
+            const path = `artifacts/${window.appId}/public/data/history/${id}`;
+            await window.deleteDoc(window.doc(window.db, ...path.split('/')));
+            showToast("기록이 삭제되었습니다.");
         }
 
         function shareLink() {
@@ -399,15 +460,13 @@
                 e: document.getElementById('extraThreads').value
             });
             const url = window.location.origin + window.location.pathname + '?' + params.toString();
-            
-            const tempInput = document.createElement('input');
-            tempInput.value = url;
-            document.body.appendChild(tempInput);
-            tempInput.select();
+            const temp = document.createElement('input');
+            temp.value = url;
+            document.body.appendChild(temp);
+            temp.select();
             document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            
-            showToast("공유 링크가 클립보드에 복사되었습니다!");
+            document.body.removeChild(temp);
+            showToast("공유용 파라미터 링크가 복사되었습니다!");
         }
 
         function showToast(msg) {
@@ -432,7 +491,6 @@
             updateSpecs();
         };
 
-        // 전역 함수 등록
         window.updateSpecs = updateSpecs;
         window.calculate = calculate;
         window.saveToCloud = saveToCloud;
