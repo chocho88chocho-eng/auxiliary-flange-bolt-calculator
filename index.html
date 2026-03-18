@@ -59,7 +59,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
         }
 
-        /* 메인 결과 카드 */
         .result-card {
             background-color: #1a233a;
             color: white;
@@ -178,7 +177,8 @@
                         <div>
                             <label class="input-label">Total Extra Threads (전체 산여유)</label>
                             <div class="relative">
-                                <input type="number" id="extraThreads" value="4" min="0" oninput="calculate()" class="custom-control font-bold pr-10">
+                                <!-- 기본값을 4에서 8로 변경 -->
+                                <input type="number" id="extraThreads" value="8" min="0" oninput="handleExtraThreadsChange()" class="custom-control font-bold pr-10">
                                 <span class="absolute right-3 top-2.5 text-[10px] text-slate-300 font-bold uppercase">Total</span>
                             </div>
                         </div>
@@ -289,6 +289,21 @@
         </div>
     </div>
 
+    <!-- Custom Warning Modal -->
+    <div id="warningModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">나사산 여유 경고</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">kzpc 표준 나사산 여유보다 작습니다.<br>계속하시겠습니까?</p>
+            <div class="flex gap-3">
+                <button onclick="dismissWarning()" class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200">취소</button>
+                <button onclick="confirmWarning()" class="flex-1 px-4 py-2.5 bg-[#1a233a] text-white rounded-lg text-xs font-bold hover:bg-slate-800">계속</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-[#1a233a] text-white rounded-full shadow-2xl text-xs font-bold transition-all opacity-0 translate-y-10 z-50"></div>
 
@@ -327,6 +342,10 @@
             }
         };
 
+        // 초기 마지막 유효 값을 8로 설정
+        let lastValidExtraThreads = 8;
+        let isProcessingWarning = false;
+
         function updateSpecs() {
             const r = document.getElementById('rating').value;
             const s = document.getElementById('size').value;
@@ -337,12 +356,54 @@
                 document.getElementById('displayN').innerText = spec.n;
                 document.getElementById('displayP').innerText = spec.p;
                 
-                // 대시보드 업데이트용
                 document.getElementById('dashboardBoltSize').innerText = spec.dia + " in";
                 document.getElementById('dashboardBoltQty').innerText = spec.q + " EA";
                 
                 calculate();
             }
+        }
+
+        function handleExtraThreadsChange() {
+            const val = parseInt(document.getElementById('extraThreads').value) || 0;
+            
+            if (val < 8 && !isProcessingWarning) {
+                showWarningModal();
+            } else {
+                calculate();
+                if (val >= 8) lastValidExtraThreads = val;
+            }
+        }
+
+        function showWarningModal() {
+            isProcessingWarning = true;
+            const modal = document.getElementById('warningModal');
+            const content = modal.querySelector('div');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function dismissWarning() {
+            const modal = document.getElementById('warningModal');
+            const content = modal.querySelector('div');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.add('scale-95');
+            content.classList.remove('scale-100');
+            
+            document.getElementById('extraThreads').value = lastValidExtraThreads;
+            isProcessingWarning = false;
+            calculate();
+        }
+
+        function confirmWarning() {
+            const modal = document.getElementById('warningModal');
+            const content = modal.querySelector('div');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.add('scale-95');
+            content.classList.remove('scale-100');
+            
+            isProcessingWarning = false;
+            calculate();
         }
 
         function calculate() {
@@ -471,6 +532,7 @@
 
         function showToast(msg) {
             const t = document.getElementById('toast');
+            if(!t) return;
             t.innerText = msg;
             t.classList.remove('opacity-0', 'translate-y-10');
             t.classList.add('opacity-100', 'translate-y-0');
@@ -497,6 +559,9 @@
         window.deleteHistory = deleteHistory;
         window.shareLink = shareLink;
         window.loadHistory = loadHistory;
+        window.handleExtraThreadsChange = handleExtraThreadsChange;
+        window.dismissWarning = dismissWarning;
+        window.confirmWarning = confirmWarning;
     </script>
 </body>
 </html>
