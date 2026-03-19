@@ -150,6 +150,8 @@
                                 <option value="150">#150</option>
                                 <option value="300" selected>#300</option>
                                 <option value="600">#600</option>
+                                <option value="900">#900</option>
+                                <option value="1500">#1500</option>
                             </select>
                         </div>
                         <div>
@@ -170,8 +172,7 @@
                             <label class="input-label">Gasket Type</label>
                             <select id="gasketType" onchange="calculate()" class="custom-control">
                                 <option value="4.5">Spiral Wound (4.5mm)</option>
-                                <option value="3.0">PTFE (3.0mm)</option>
-                                <option value="1.5">Rubber (1.5mm)</option>
+                                <option value="3.0">Teflon (3.0mm)</option>
                             </select>
                         </div>
                         <div>
@@ -335,6 +336,24 @@
                 "4":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
                 "6":    { t: 47.7, dia: "1",    n: 25.4, p: 3.17, w: 4.0, q: 12 },
                 "8":    { t: 55.6, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 12 }
+            },
+            "900": {
+                "0.5":  { t: 22.3, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 4 },
+                "1":    { t: 28.6, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 4 },
+                "2":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
+                "3":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
+                "4":    { t: 44.5, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 8 },
+                "6":    { t: 55.6, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 12 },
+                "8":    { t: 63.5, dia: "1-3/8", n: 34.9, p: 3.17, w: 5.0, q: 12 }
+            },
+            "1500": {
+                "0.5":  { t: 22.3, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 4 },
+                "1":    { t: 28.6, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 4 },
+                "2":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
+                "3":    { t: 47.7, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 8 },
+                "4":    { t: 54.0, dia: "1-1/4", n: 31.8, p: 3.17, w: 5.0, q: 8 },
+                "6":    { t: 82.6, dia: "1-3/8", n: 34.9, p: 3.17, w: 5.0, q: 12 },
+                "8":    { t: 92.1, dia: "1-5/8", n: 41.3, p: 3.17, w: 6.0, q: 12 }
             }
         };
 
@@ -474,7 +493,7 @@
                         <div class="font-bold text-slate-800 text-[11px] truncate pr-4">${item.label}</div>
                         <div class="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">#${item.rating} ${item.size}" → ${item.resultMm}mm</div>
                         <button onclick="event.stopPropagation(); deleteHistory('${item.id}')" class="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"></path></svg>
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"></path></svg>
                         </button>
                     `;
                     list.appendChild(div);
