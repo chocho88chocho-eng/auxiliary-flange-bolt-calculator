@@ -188,6 +188,17 @@
                             </select>
                         </div>
                         <div>
+                            <label class="flex items-center gap-2 text-sm font-semibold">
+                                <input type="checkbox" id="orificeEnabled" onchange="calculate()">
+                                Orifice Plate 적용
+                            </label>
+                            <div id="orificeFields" hidden class="mt-2">
+                                <p id="orificeSch80Note" class="mb-2 text-xs text-slate-600" aria-live="polite"></p>
+                                <label for="orificeThickness" class="input-label">승인 도면 Plate 두께 (mm)</label>
+                                <input type="number" id="orificeThickness" min="0" step="any" oninput="calculate()" class="custom-control">
+                            </div>
+                        </div>
+                        <div>
                             <label class="input-label">Total Extra Threads (전체 산여유)</label>
                             <div class="relative">
                                 <input type="number" id="extraThreads" value="8" min="0" oninput="handleExtraThreadsChange()" class="custom-control font-bold pr-10">
@@ -260,6 +271,12 @@
                             <div class="basis-row">
                                 <span class="text-slate-500">Gasket Thickness</span>
                                 <span id="basisGasket" class="font-bold">-</span>
+                            </div>
+                            <div id="basisOrificeRow" hidden>
+                                <div class="basis-row">
+                                    <span class="text-slate-500">Orifice Plate (×1)</span>
+                                    <span id="basisOrifice" class="font-bold">—</span>
+                                </div>
                             </div>
                             <div class="basis-row">
                                 <span class="text-slate-500">Heavy Hex Nut H (x2)</span>
@@ -479,7 +496,11 @@
         function clearResult(message) {
             document.getElementById('dataNote').innerText = '';
             document.getElementById('washerSpec').innerText = '';
-            for (const id of ['displayT','displayDia','displayN','displayP','dashboardBoltSize','dashboardBoltQty','minReq','finalLengthMm','basisFlange','basisGasket','basisNut','basisWasher','basisExtra','basisTotal']) document.getElementById(id).innerText = '—';
+            for (const id of ['displayT','displayDia','displayN','displayP','dashboardBoltSize','dashboardBoltQty']) document.getElementById(id).innerText = '—';
+            clearCalculation(message);
+        }
+        function clearCalculation(message) {
+            for (const id of ['minReq','finalLengthMm','basisFlange','basisGasket','basisOrifice','basisNut','basisWasher','basisExtra','basisTotal']) document.getElementById(id).innerText = '—';
             document.getElementById('specSummary').innerText = message;
         }
         let lastValidExtraThreads = 8;
@@ -501,6 +522,7 @@
             }
             if (!spec) {
                 sizeSelect.selectedIndex = -1;
+                getOrifice('');
                 clearResult('현재 Rating에서 지원하는 NPS를 선택하세요.');
                 return;
             }
@@ -559,14 +581,59 @@
             calculate();
         }
 
+        // ASME B36.10-2022 Table 2-1. Values are [outside diameter, SCH 80 wall thickness] in inches.
+        const sch80PipeInch = {
+            "0.5": [0.840, 0.147], "0.75": [1.050, 0.154], "1": [1.315, 0.179],
+            "1.25": [1.660, 0.191], "1.5": [1.900, 0.200], "2": [2.375, 0.218],
+            "2.5": [2.875, 0.276], "3": [3.500, 0.300], "3.5": [4.000, 0.318],
+            "4": [4.500, 0.337], "5": [5.563, 0.375], "6": [6.625, 0.432],
+            "8": [8.625, 0.500], "10": [10.750, 0.594], "12": [12.750, 0.688],
+            "14": [14.000, 0.750], "16": [16.000, 0.844], "18": [18.000, 0.938]
+        };
+
+        function getOrifice(size) {
+            const enabled = document.getElementById('orificeEnabled').checked;
+            const input = document.getElementById('orificeThickness');
+            const note = document.getElementById('orificeSch80Note');
+            const pipe = sch80PipeInch[size];
+            const diameter = pipe ? (pipe[0] - 2 * pipe[1]) * inchToMm : 0;
+            const limit = diameter >= 50 && diameter <= 1000 ? diameter * 0.05 : null;
+            const automatic = enabled && input.value === '' && !input.validity.badInput;
+            const thickness = enabled ? (automatic ? limit : input.valueAsNumber) : 0;
+            const valid = !enabled || (Number.isFinite(thickness) && thickness > 0);
+            document.getElementById('orificeFields').hidden = !enabled;
+            document.getElementById('basisOrificeRow').hidden = !enabled;
+            input.placeholder = limit === null ? '승인 도면 두께 입력' : '미입력 시 SCH 80 예비값';
+            note.innerText = pipe ? 'SCH 80 공칭 내경 ' + diameter.toFixed(2) + ' mm · ' +
+                (limit === null ? 'ISO 5167-2 내경 범위 밖 · 승인 도면 두께 입력'
+                    : 'ISO 두께 상한 ' + limit.toFixed(3) + ' mm (미입력 시 예비 산정에 적용)') : '';
+            if (enabled && !automatic && valid && limit !== null && thickness > limit) {
+                note.innerText += ' · 입력값이 공칭 내경 기준 ISO 상한을 초과합니다.';
+            }
+            const saved = enabled ? (automatic ? 'sch80' : thickness) : null;
+            return { enabled, automatic, thickness, valid, saved };
+        }
+
+        function restoreOrifice(thickness) {
+            document.getElementById('orificeEnabled').checked = thickness != null;
+            document.getElementById('orificeThickness').value = thickness === 'sch80' ? '' : thickness ?? '';
+        }
+
         function calculate() {
             const r = document.getElementById('rating').value;
             const s = document.getElementById('size').value;
+            const { enabled: orificeEnabled, automatic, thickness: plateThickness, valid } = getOrifice(s);
             const spec = asmeData[r]?.[s];
             const gThk = parseFloat(document.getElementById('gasketType').value);
             const extra = parseInt(document.getElementById('extraThreads').value) || 0;
 
             if (!spec) { clearResult('등록 치수가 없는 조합입니다.'); return; }
+            if (!valid) {
+                clearCalculation('Orifice Plate의 승인 도면 두께(mm)를 입력하세요.');
+                return;
+            }
+            const gasketCount = orificeEnabled ? 2 : 1;
+            const gasketTotal = gThk * gasketCount;
             const washer = spec.w;
             if (!Number.isFinite(gThk) || extra < 0) { clearResult('입력값을 확인하세요.'); return; }
 
@@ -575,14 +642,15 @@
             const wSum = washer * 2;
             const eSum = spec.p * extra;
 
-            const minReq = fSum + gThk + nSum + wSum + eSum;
+            const minReq = fSum + gasketTotal + plateThickness + nSum + wSum + eSum;
             const standard = Math.ceil(minReq / 5) * 5;
             
             document.getElementById('minReq').innerText = minReq.toFixed(2) + " mm";
             document.getElementById('finalLengthMm').innerText = standard;
-            document.getElementById('specSummary').innerText = `ASME B16.5 #${r} ${s}" / Gasket ${gThk}mm / ${extra} Thds`;
+            document.getElementById('specSummary').innerText = `ASME B16.5 #${r} ${s}" / Gasket ${gThk}mm × ${gasketCount} / ${extra} Thds${orificeEnabled ? ` / Orifice ${plateThickness.toFixed(3)}mm${automatic ? " (SCH 80 예비)" : ""}` : ''}`;
             document.getElementById('basisFlange').innerText = fSum.toFixed(1) + " mm";
-            document.getElementById('basisGasket').innerText = gThk.toFixed(1) + " mm";
+            document.getElementById('basisGasket').innerText = gThk.toFixed(1) + ' × ' + gasketCount + ' = ' + gasketTotal.toFixed(1) + ' mm';
+            document.getElementById('basisOrifice').innerText = orificeEnabled ? plateThickness.toFixed(3) + ' mm' + (automatic ? ' (SCH 80 예비)' : ' (도면)') : '—';
             document.getElementById('basisNut').innerText = nSum.toFixed(1) + " mm";
             document.getElementById('basisWasher').innerText = washer.toFixed(4) + ' × 2 = ' + wSum.toFixed(4) + ' mm' + ' (Regular T min)';
             document.getElementById('basisExtra').innerText = eSum.toFixed(2) + " mm";
@@ -603,6 +671,7 @@
                 rating: document.getElementById('rating').value,
                 size: document.getElementById('size').value,
                 gasket: document.getElementById('gasketType').value,
+                orificeThickness: getOrifice(document.getElementById('size').value).saved,
                 extra: document.getElementById('extraThreads').value,
                 resultMm: document.getElementById('finalLengthMm').innerText,
                 timestamp: Date.now()
@@ -635,6 +704,7 @@
                         document.getElementById('rating').value = item.rating;
                         document.getElementById('size').value = item.size;
                         document.getElementById('gasketType').value = item.gasket;
+                        restoreOrifice(item.orificeThickness);
                         document.getElementById('extraThreads').value = item.extra;
                         updateSpecs();
                     };
@@ -668,6 +738,12 @@
                 wb: 'spring-regular-tmin-2',
                 e: document.getElementById('extraThreads').value
             });
+            const orifice = getOrifice(s);
+            if (!orifice.valid) {
+                showToast('Orifice Plate의 승인 도면 두께(mm)를 입력하세요.');
+                return;
+            }
+            if (orifice.enabled) params.set('o', orifice.saved);
             const url = window.location.origin + window.location.pathname + '?' + params.toString();
             const temp = document.createElement('input');
             temp.value = url; document.body.appendChild(temp); temp.select();
@@ -695,6 +771,7 @@
                 document.getElementById('gasketType').value = params.get('g');
                 document.getElementById('extraThreads').value = params.get('e');
                 lastValidExtraThreads = parseInt(params.get('e')) || 8;
+                restoreOrifice(params.get('o'));
             }
             updateSpecs();
         };
