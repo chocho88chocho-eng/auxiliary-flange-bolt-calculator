@@ -154,6 +154,7 @@
                                 <option value="600">#600</option>
                                 <option value="900">#900</option>
                                 <option value="1500">#1500</option>
+                                <option value="2500">#2500</option>
                             </select>
                         </div>
                         <div>
@@ -162,20 +163,21 @@
                                 <option value="0.5">1/2"</option>
                                 <option value="0.75">3/4"</option>
                                 <option value="1">1"</option>
+                                <option value="1.25">1-1/4"</option>
                                 <option value="1.5">1-1/2"</option>
                                 <option value="2" selected>2"</option>
+                                <option value="2.5">2-1/2"</option>
                                 <option value="3">3"</option>
+                                <option value="3.5">3-1/2"</option>
                                 <option value="4">4"</option>
+                                <option value="5">5"</option>
                                 <option value="6">6"</option>
                                 <option value="8">8"</option>
-<option value="10">10"</option>
-<option value="12">12"</option>
-<option value="14">14"</option>
-<option value="16">16"</option>
-<option value="18">18"</option>
-<option value="20">20"</option>
-<option value="22">22"</option>
-<option value="24">24"</option>
+                                <option value="10">10"</option>
+                                <option value="12">12"</option>
+                                <option value="14">14"</option>
+                                <option value="16">16"</option>
+                                <option value="18">18"</option>
                             </select>
                         </div>
                         <div>
@@ -322,82 +324,161 @@
     <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-[#1a233a] text-white rounded-full shadow-2xl text-xs font-bold transition-all opacity-0 translate-y-10 z-50"></div>
 
     <script>
-        const asmeData = {
-            "150": {
-                "0.5":  { t: 11.2, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
-                "0.75": { t: 12.7, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
-                "1":    { t: 14.3, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
-                "1.5":  { t: 17.5, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
-                "2":    { t: 19.1, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
-                "3":    { t: 23.9, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
-                "4":    { t: 23.9, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 8 },
-                "6":    { t: 25.4, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 8 },
-                "8":    { t: 28.6, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 8 }
-            },
-            "300": {
-                "0.5":  { t: 14.3, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
-                "0.75": { t: 15.9, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
-                "1":    { t: 17.5, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
-                "1.5":  { t: 20.7, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 4 },
-                "2":    { t: 22.3, dia: "5/8",  n: 14.7, p: 2.31, w: 4.0, q: 8 },
-                "3":    { t: 28.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.0, q: 8 },
-                "4":    { t: 31.8, dia: "3/4",  n: 18.2, p: 2.54, w: 4.0, q: 8 },
-                "6":    { t: 36.6, dia: "3/4",  n: 18.2, p: 2.54, w: 4.0, q: 12 },
-                "8":    { t: 41.3, dia: "7/8",  n: 21.8, p: 2.82, w: 4.0, q: 12 }
-            },
-            "600": {
-                "0.5":  { t: 14.3, dia: "1/2",  n: 12.3, p: 1.95, w: 2.0, q: 4 },
-                "1":    { t: 17.5, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 4 },
-                "2":    { t: 25.4, dia: "5/8",  n: 15.5, p: 2.31, w: 2.5, q: 8 },
-                "3":    { t: 31.8, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 8 },
-                "4":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
-                "6":    { t: 47.7, dia: "1",    n: 25.4, p: 3.17, w: 4.0, q: 12 },
-                "8":    { t: 55.6, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 12 }
-            },
-            "900": {
-                "0.5":  { t: 22.3, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 4 },
-                "1":    { t: 28.6, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 4 },
-                "2":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
-                "3":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
-                "4":    { t: 44.5, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 8 },
-                "6":    { t: 55.6, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 12 },
-                "8":    { t: 63.5, dia: "1-3/8", n: 34.9, p: 3.17, w: 5.0, q: 12 }
-            },
-            "1500": {
-                "0.5":  { t: 22.3, dia: "3/4",  n: 19.1, p: 2.54, w: 3.0, q: 4 },
-                "1":    { t: 28.6, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 4 },
-                "2":    { t: 38.1, dia: "7/8",  n: 22.2, p: 2.82, w: 3.5, q: 8 },
-                "3":    { t: 47.7, dia: "1-1/8", n: 28.6, p: 3.17, w: 4.5, q: 8 },
-                "4":    { t: 54.0, dia: "1-1/4", n: 31.8, p: 3.17, w: 5.0, q: 8 },
-                "6":    { t: 82.6, dia: "1-3/8", n: 34.9, p: 3.17, w: 5.0, q: 12 },
-                "8":    { t: 92.1, dia: "1-5/8", n: 41.3, p: 3.17, w: 6.0, q: 12 }
-            }
+        // ASME B16.5-2025, U.S. Customary tables. Rows: NPS, minimum body thickness (in), stud diameter (in), stud count.
+        const flangeRows = {
+            150: [ // Tables 7C, 8C
+                ["0.5", 0.38, "1/2", 4],
+                ["0.75", 0.44, "1/2", 4],
+                ["1", 0.50, "1/2", 4],
+                ["1.25", 0.56, "1/2", 4],
+                ["1.5", 0.62, "1/2", 4],
+                ["2", 0.69, "5/8", 4],
+                ["2.5", 0.81, "5/8", 4],
+                ["3", 0.88, "5/8", 4],
+                ["3.5", 0.88, "5/8", 8],
+                ["4", 0.88, "5/8", 8],
+                ["5", 0.88, "3/4", 8],
+                ["6", 0.94, "3/4", 8],
+                ["8", 1.06, "3/4", 8],
+                ["10", 1.12, "7/8", 12],
+                ["12", 1.19, "7/8", 12],
+                ["14", 1.31, "1", 12],
+                ["16", 1.38, "1", 16],
+                ["18", 1.50, "1-1/8", 16],
+            ],
+            300: [ // Tables 10C, 11C
+                ["0.5", 0.50, "1/2", 4],
+                ["0.75", 0.56, "5/8", 4],
+                ["1", 0.62, "5/8", 4],
+                ["1.25", 0.69, "5/8", 4],
+                ["1.5", 0.75, "3/4", 4],
+                ["2", 0.81, "5/8", 8],
+                ["2.5", 0.94, "3/4", 8],
+                ["3", 1.06, "3/4", 8],
+                ["3.5", 1.12, "3/4", 8],
+                ["4", 1.19, "3/4", 8],
+                ["5", 1.31, "3/4", 8],
+                ["6", 1.38, "3/4", 12],
+                ["8", 1.56, "7/8", 12],
+                ["10", 1.81, "1", 16],
+                ["12", 1.94, "1-1/8", 16],
+                ["14", 2.06, "1-1/8", 20],
+                ["16", 2.19, "1-1/4", 20],
+                ["18", 2.31, "1-1/4", 24],
+            ],
+            600: [ // Tables 15C, 16C
+                ["0.5", 0.56, "1/2", 4],
+                ["0.75", 0.62, "5/8", 4],
+                ["1", 0.69, "5/8", 4],
+                ["1.25", 0.81, "5/8", 4],
+                ["1.5", 0.88, "3/4", 4],
+                ["2", 1.00, "5/8", 8],
+                ["2.5", 1.12, "3/4", 8],
+                ["3", 1.25, "3/4", 8],
+                ["3.5", 1.38, "7/8", 8],
+                ["4", 1.50, "7/8", 8],
+                ["5", 1.75, "1", 8],
+                ["6", 1.88, "1", 12],
+                ["8", 2.19, "1-1/8", 12],
+                ["10", 2.50, "1-1/4", 16],
+                ["12", 2.62, "1-1/4", 20],
+                ["14", 2.75, "1-3/8", 20],
+                ["16", 3.00, "1-1/2", 20],
+                ["18", 3.25, "1-5/8", 20],
+            ],
+            900: [ // Tables 17C, 18C
+                ["3", 1.50, "7/8", 8],
+                ["4", 1.75, "1-1/8", 8],
+                ["5", 2.00, "1-1/4", 8],
+                ["6", 2.19, "1-1/8", 12],
+                ["8", 2.50, "1-3/8", 12],
+                ["10", 2.75, "1-3/8", 16],
+                ["12", 3.12, "1-3/8", 20],
+                ["14", 3.38, "1-1/2", 20],
+                ["16", 3.50, "1-5/8", 20],
+                ["18", 4.00, "1-7/8", 20],
+            ],
+            1500: [ // Tables 19C, 20C
+                ["0.5", 0.88, "3/4", 4],
+                ["0.75", 1.00, "3/4", 4],
+                ["1", 1.12, "7/8", 4],
+                ["1.25", 1.12, "7/8", 4],
+                ["1.5", 1.25, "1", 4],
+                ["2", 1.50, "7/8", 8],
+                ["2.5", 1.62, "1", 8],
+                ["3", 1.88, "1-1/8", 8],
+                ["4", 2.12, "1-1/4", 8],
+                ["5", 2.88, "1-1/2", 8],
+                ["6", 3.25, "1-3/8", 12],
+                ["8", 3.62, "1-5/8", 12],
+                ["10", 4.25, "1-7/8", 12],
+                ["12", 4.88, "2", 16],
+                ["14", 5.25, "2-1/4", 16],
+                ["16", 5.75, "2-1/2", 16],
+                ["18", 6.38, "2-3/4", 16],
+            ],
+            2500: [ // Tables 21C, 22C
+                ["0.5", 1.19, "3/4", 4],
+                ["0.75", 1.25, "3/4", 4],
+                ["1", 1.38, "7/8", 4],
+                ["1.25", 1.50, "1", 4],
+                ["1.5", 1.75, "1-1/8", 4],
+                ["2", 2.00, "1", 8],
+                ["2.5", 2.25, "1-1/8", 8],
+                ["3", 2.62, "1-1/4", 8],
+                ["4", 3.00, "1-1/2", 8],
+                ["5", 3.62, "1-3/4", 8],
+                ["6", 4.25, "2", 8],
+                ["8", 5.00, "2", 12],
+                ["10", 6.50, "2-1/2", 12],
+                ["12", 7.25, "2-3/4", 12],
+            ],
         };
 
-
-        // Added RF flange data: Valvosider catalog p119 and Texas Flange catalog pp3–8.
-        // Nut height: Portland Bolt heavy hex nut maximum. See accompanying notes.
-        const extendedData = {"150": {"10": {"t": 30.2, "rf": 0, "dia": "7/8", "n": 22.479, "p": 2.822222222222222, "w": 0, "q": 12, "extended": true, "thread": "UNC"}, "12": {"t": 31.8, "rf": 0, "dia": "7/8", "n": 22.479, "p": 2.822222222222222, "w": 0, "q": 12, "extended": true, "thread": "UNC"}, "14": {"t": 34.9, "rf": 0, "dia": "1", "n": 25.7048, "p": 3.175, "w": 0, "q": 12, "extended": true, "thread": "UNC"}, "16": {"t": 36.5, "rf": 0, "dia": "1", "n": 25.7048, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "UNC"}, "18": {"t": 39.7, "rf": 0, "dia": "1-1/8", "n": 28.9306, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "20": {"t": 42.9, "rf": 0, "dia": "1-1/8", "n": 28.9306, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "22": {"t": 45.974, "rf": 0, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "24": {"t": 47.8, "rf": 0, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}}, "300": {"10": {"t": 47.6, "rf": 0, "dia": "1", "n": 25.7048, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "UNC"}, "12": {"t": 50.8, "rf": 0, "dia": "1-1/8", "n": 28.9306, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "14": {"t": 54, "rf": 0, "dia": "1-1/8", "n": 28.9306, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "16": {"t": 57.2, "rf": 0, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "18": {"t": 60.3, "rf": 0, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}, "20": {"t": 63.5, "rf": 0, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}, "22": {"t": 66.802, "rf": 0, "dia": "1-1/2", "n": 38.227, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}, "24": {"t": 69.9, "rf": 0, "dia": "1-1/2", "n": 38.227, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}}, "600": {"10": {"t": 63.5, "rf": 6.35, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "12": {"t": 66.7, "rf": 6.35, "dia": "1-1/4", "n": 31.7754, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "14": {"t": 69.9, "rf": 6.35, "dia": "1-3/8", "n": 35.0012, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "16": {"t": 76.2, "rf": 6.35, "dia": "1-1/2", "n": 38.227, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "18": {"t": 82.6, "rf": 6.35, "dia": "1-5/8", "n": 41.4528, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "20": {"t": 88.9, "rf": 6.35, "dia": "1-5/8", "n": 41.4528, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}, "22": {"t": 95.25, "rf": 6.35, "dia": "1-5/8", "n": 41.4528, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}, "24": {"t": 101.6, "rf": 6.35, "dia": "1-7/8", "n": 47.9044, "p": 3.175, "w": 0, "q": 24, "extended": true, "thread": "8UN"}}, "900": {"10": {"t": 69.9, "rf": 6.35, "dia": "1-3/8", "n": 35.0012, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "12": {"t": 79.4, "rf": 6.35, "dia": "1-3/8", "n": 35.0012, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "14": {"t": 85.7, "rf": 6.35, "dia": "1-1/2", "n": 38.227, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "16": {"t": 88.9, "rf": 6.35, "dia": "1-5/8", "n": 41.4528, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "18": {"t": 101.6, "rf": 6.35, "dia": "1-7/8", "n": 47.9044, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "20": {"t": 108, "rf": 6.35, "dia": "2", "n": 51.1302, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}, "24": {"t": 139.7, "rf": 6.35, "dia": "2-1/2", "n": 63.627, "p": 3.175, "w": 0, "q": 20, "extended": true, "thread": "8UN"}}, "1500": {"10": {"t": 108, "rf": 6.35, "dia": "1-7/8", "n": 47.9044, "p": 3.175, "w": 0, "q": 12, "extended": true, "thread": "8UN"}, "12": {"t": 124, "rf": 6.35, "dia": "2", "n": 51.1302, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "14": {"t": 133.4, "rf": 6.35, "dia": "2-1/4", "n": 57.1754, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "16": {"t": 146.1, "rf": 6.35, "dia": "2-1/2", "n": 63.627, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "18": {"t": 161.9, "rf": 6.35, "dia": "2-3/4", "n": 70.0786, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "20": {"t": 177.8, "rf": 6.35, "dia": "3", "n": 76.5302, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}, "24": {"t": 203.2, "rf": 6.35, "dia": "3-1/2", "n": 89.0524, "p": 3.175, "w": 0, "q": 16, "extended": true, "thread": "8UN"}}};
-        for (const [rating, sizes] of Object.entries(extendedData)) Object.assign(asmeData[rating], sizes);
-        // Excluded at user's request: NPS 24, Class 1500.
-        delete asmeData["1500"]["24"];
-        // ASME B18.21.1-2009 Regular helical spring-lock washer, T minimum.
-        // Source: HASM Nickel Alloy Fasteners, printed p37. Inches, converted with 25.4.
-        const springWasherInch = Object.freeze({
+        const inchToMm = 25.4;
+        // ASME B18.2.2-2022 Table 1.1.1-11, Heavy Hex Nut maximum height in inches.
+        const heavyHexNutMaxInch = {
+            "1/2": 0.504, "5/8": 0.631, "3/4": 0.758, "7/8": 0.885,
+            "1": 1.012, "1-1/8": 1.139, "1-1/4": 1.251, "1-3/8": 1.378,
+            "1-1/2": 1.505, "1-5/8": 1.632, "1-3/4": 1.759, "1-7/8": 1.886,
+            "2": 2.013, "2-1/4": 2.251, "2-1/2": 2.505, "2-3/4": 2.759
+        };
+        // ASME B18.21.1-2009, Regular helical spring-lock washer minimum mean section thickness in inches.
+        const springWasherInch = {
             "1/2": 0.125, "5/8": 0.156, "3/4": 0.188, "7/8": 0.219,
             "1": 0.250, "1-1/8": 0.281, "1-1/4": 0.312, "1-3/8": 0.344,
             "1-1/2": 0.375, "1-5/8": 0.389, "1-3/4": 0.389, "1-7/8": 0.422,
-            "2": 0.422, "2-1/4": 0.440, "2-1/2": 0.440, "2-3/4": 0.458, "3": 0.458
-        });
-        for (const sizes of Object.values(asmeData)) {
-            for (const spec of Object.values(sizes)) {
-                spec.w = springWasherInch[spec.dia] === undefined ? null : springWasherInch[spec.dia] * 25.4;
-            }
+            "2": 0.422, "2-1/4": 0.440, "2-1/2": 0.440, "2-3/4": 0.458
+        };
+        // B16.5 Table 1.1-3, alloy-steel bolting: UNC through 1 in, 8UN above 1 in.
+        const coarseThreadsPerInch = { "1/2": 13, "5/8": 11, "3/4": 10, "7/8": 9, "1": 8 };
+
+        const asmeData = Object.fromEntries(Object.entries(flangeRows).map(([rating, rows]) => {
+            const rfInch = Number(rating) <= 300 ? 0.06 : 0.25;
+            const specs = rows.map(([size, thickness, dia, q]) => {
+                const coarseTpi = coarseThreadsPerInch[dia];
+                const tpi = coarseTpi ?? 8;
+                return [size, {
+                    t: thickness * inchToMm,
+                    rf: rfInch * inchToMm,
+                    dia, q,
+                    n: heavyHexNutMaxInch[dia] * inchToMm,
+                    w: springWasherInch[dia] * inchToMm,
+                    p: inchToMm / tpi,
+                    thread: coarseTpi ? dia + "-" + tpi + " UNC" : dia + "-8 UN"
+                }];
+            });
+            return [rating, Object.fromEntries(specs)];
+        }));
+
+        // Class 900 NPS 1/2 through 2-1/2 uses Class 1500 dimensions (Tables 17C and 18C).
+        for (const size of ["0.5", "0.75", "1", "1.25", "1.5", "2", "2.5"]) {
+            asmeData["900"][size] = asmeData["1500"][size];
         }
-        function washerDetails(spec) {
-            return { thickness: spec.w, standard: true };
-        }
+
         function clearResult(message) {
+            document.getElementById('dataNote').innerText = '';
+            document.getElementById('washerSpec').innerText = '';
             for (const id of ['displayT','displayDia','displayN','displayP','dashboardBoltSize','dashboardBoltQty','minReq','finalLengthMm','basisFlange','basisGasket','basisNut','basisWasher','basisExtra','basisTotal']) document.getElementById(id).innerText = '—';
             document.getElementById('specSummary').innerText = message;
         }
@@ -405,36 +486,37 @@
         let isProcessingWarning = false;
 
         function handleRatingChange() {
-            if (document.getElementById('rating').value === '1500' && document.getElementById('size').value === '24') {
-                document.getElementById('size').value = '20';
-                showToast('Class 1500의 24인치는 제외되어 20인치로 변경했습니다.');
-            }
             updateSpecs();
         }
+
         function updateSpecs() {
             const r = document.getElementById('rating').value;
-            const s = document.getElementById('size').value;
+            const sizeSelect = document.getElementById('size');
+            const s = sizeSelect.value;
             const spec = asmeData[r]?.[s];
 
-            for (const option of document.getElementById('size').options) {
-                option.hidden = r === '1500' && option.value === '24';
+            for (const option of sizeSelect.options) {
                 option.disabled = !asmeData[r]?.[option.value];
+                option.hidden = option.disabled;
+            }
+            if (!spec) {
+                sizeSelect.selectedIndex = -1;
+                clearResult('현재 Rating에서 지원하는 NPS를 선택하세요.');
+                return;
             }
 
-            if (!spec) { clearResult('해당 Rating / NPS의 등록 치수가 없습니다. 다른 크기를 선택하세요.'); return; }
-            document.getElementById('dataNote').innerText = spec.extended
-                ? '추가 치수: RF 플랜지 / Heavy Hex Nut 최대 높이 / ' + spec.thread + '. RF 추가 높이: ' + spec.rf + ' mm/개. 스프링 와셔: ASME B18.21.1 Regular T 최소 두께 × 2개.'
-                : '8인치 이하 플랜지·너트·피치는 원본 유지. 와셔는 ASME B18.21.1 Regular T 최소 두께 × 2개로 변경.';
+            const reference = r === '900' && Number(s) <= 2.5 ? ' (#1500 치수 참조)' : '';
+            document.getElementById('dataNote').innerText =
+                'ASME B16.5-2025 RF 플랜지' + reference + ' · ' + spec.thread +
+                ' · ASME B18.2.2 Heavy Hex Nut 최대 높이 · ASME B18.21.1 Regular 와셔 최소 두께 × 2개';
             document.getElementById('washerSpec').innerText = spec.dia + '″ / ' + springWasherInch[spec.dia].toFixed(3) + ' in = ' + spec.w.toFixed(4) + ' mm/개 × 2개';
-            if (spec) {
-                document.getElementById('displayT').innerText = (spec.t + (spec.rf || 0)).toFixed(2);
-                document.getElementById('displayDia').innerText = spec.dia;
-                document.getElementById('displayN').innerText = spec.n;
-                document.getElementById('displayP').innerText = spec.p;
-                document.getElementById('dashboardBoltSize').innerText = spec.dia + " in";
-                document.getElementById('dashboardBoltQty').innerText = spec.q + " EA";
-                calculate();
-            }
+            document.getElementById('displayT').innerText = (spec.t + spec.rf).toFixed(2);
+            document.getElementById('displayDia').innerText = spec.dia;
+            document.getElementById('displayN').innerText = spec.n.toFixed(2);
+            document.getElementById('displayP').innerText = spec.p.toFixed(3);
+            document.getElementById('dashboardBoltSize').innerText = spec.dia + ' in';
+            document.getElementById('dashboardBoltQty').innerText = spec.q + ' EA';
+            calculate();
         }
 
         function handleExtraThreadsChange() {
@@ -485,15 +567,10 @@
             const extra = parseInt(document.getElementById('extraThreads').value) || 0;
 
             if (!spec) { clearResult('등록 치수가 없는 조합입니다.'); return; }
-            const washerInfo = washerDetails(spec);
-            const washer = washerInfo.thickness;
-            if (washer === null) {
-                clearResult('표준 스프링 와셔 치수 데이터가 없습니다.');
-                return;
-            }
+            const washer = spec.w;
             if (!Number.isFinite(gThk) || extra < 0) { clearResult('입력값을 확인하세요.'); return; }
 
-            const fSum = (spec.t + (spec.rf || 0)) * 2;
+            const fSum = (spec.t + spec.rf) * 2;
             const nSum = spec.n * 2;
             const wSum = washer * 2;
             const eSum = spec.p * extra;
@@ -507,7 +584,7 @@
             document.getElementById('basisFlange').innerText = fSum.toFixed(1) + " mm";
             document.getElementById('basisGasket').innerText = gThk.toFixed(1) + " mm";
             document.getElementById('basisNut').innerText = nSum.toFixed(1) + " mm";
-            document.getElementById('basisWasher').innerText = washer.toFixed(4) + ' × 2 = ' + wSum.toFixed(4) + ' mm' + (washerInfo.standard ? ' (Regular T min)' : ' (제품 입력값)');
+            document.getElementById('basisWasher').innerText = washer.toFixed(4) + ' × 2 = ' + wSum.toFixed(4) + ' mm' + ' (Regular T min)';
             document.getElementById('basisExtra').innerText = eSum.toFixed(2) + " mm";
             document.getElementById('basisTotal').innerText = minReq.toFixed(2) + " mm";
         }
@@ -581,9 +658,12 @@
         }
 
         function shareLink() {
+            const r = document.getElementById('rating').value;
+            const s = document.getElementById('size').value;
+            if (!asmeData[r]?.[s]) { showToast('현재 Rating에서 지원하는 NPS를 선택하세요.'); return; }
             const params = new URLSearchParams({
-                r: document.getElementById('rating').value,
-                s: document.getElementById('size').value,
+                r,
+                s,
                 g: document.getElementById('gasketType').value,
                 wb: 'spring-regular-tmin-2',
                 e: document.getElementById('extraThreads').value
